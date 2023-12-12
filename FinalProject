@@ -1,0 +1,46 @@
+<#
+Author: Your Name
+Date: Date Written
+Description: Information Gathering Script
+#>
+
+param (
+    [Parameter(Mandatory=$true)]
+    [string]$computername
+)
+
+# Step 1 - Create Your Script
+# (No specific instructions provided for this step)
+
+# Step 2 - Gather Information about a Windows Server
+# Task 1 - Determine Operating System information
+$osInfo = Get-CimInstance -ComputerName $computername -ClassName Win32_OperatingSystem
+Write-Output "Operating System Information" | Out-File -FilePath "C:\YourLastNameFall2022.txt" -Append
+Write-Output "OS Name: $($osInfo.Caption)" | Out-File -FilePath "C:\YourLastNameFall2022.txt" -Append
+Write-Output "Build: $($osInfo.BuildNumber)" | Out-File -FilePath "C:\YourLastNameFall2022.txt" -Append
+Write-Output "Version: $($osInfo.Version)" | Out-File -FilePath "C:\YourLastNameFall2022.txt" -Append
+
+# Task 2 - Processor information
+$processorInfo = Get-CimInstance -ComputerName $computername -ClassName Win32_Processor
+Write-Output "Processor Information" | Out-File -FilePath "C:\YourLastNameFall2022.txt" -Append
+Write-Output "Device ID: $($processorInfo.DeviceID)" | Out-File -FilePath "C:\YourLastNameFall2022.txt" -Append
+Write-Output "Name: $($processorInfo.Name)" | Out-File -FilePath "C:\YourLastNameFall2022.txt" -Append
+Write-Output "Max Clock Speed: $($processorInfo.MaxClockSpeed)" | Out-File -FilePath "C:\YourLastNameFall2022.txt" -Append
+
+# Task 3 - Determine IP Address configuration
+$ipConfig = Get-CimInstance -ComputerName $computername -ClassName Win32_NetworkAdapterConfiguration | Where-Object { $_.IPAddress -ne $null }
+Write-Output "IP Address Configuration" | Out-File -FilePath "C:\YourLastNameFall2022.txt" -Append
+foreach ($config in $ipConfig) {
+    Write-Output "IP Address: $($config.IPAddress)" | Out-File -FilePath "C:\YourLastNameFall2022.txt" -Append
+    Write-Output "Subnet Mask: $($config.IPSubnet)" | Out-File -FilePath "C:\YourLastNameFall2022.txt" -Append
+    Write-Output "Default Gateway: $($config.DefaultIPGateway)" | Out-File -FilePath "C:\YourLastNameFall2022.txt" -Append
+    Write-Output "DHCP Enabled: $($config.DHCPEnabled)" | Out-File -FilePath "C:\YourLastNameFall2022.txt" -Append
+}
+
+# Step 3 - Convert Your Commands to Run Remotely
+
+
+# Step 4 - Output the Results of Your Commands to a Report
+
+
+# Step 5 - Final review
