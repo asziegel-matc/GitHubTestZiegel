@@ -1,46 +1,30 @@
-<#
-Author: Your Name
-Date: Date Written
-Description: Information Gathering Script
-#>
+# 1. Determine Operating System information
+(Get-CimInstance -ClassName Win32_OperatingSystem). | Select-Object Caption, BuildNumber, Version
 
-param (
-    [Parameter(Mandatory=$true)]
-    [string]$computername
-)
+# 2. Processor information
+(Get-CimInstance -ClassName Win32_Processor). | Select-Object DeviceID, Name, MaxClockSpeed
 
-# Step 1 - Create Your Script
-# (No specific instructions provided for this step)
+# 3. Determine IP Address configuration
+(Get-CimInstance -ClassName Win32_NetworkAdapterConfiguration | Where-Object { $_.IPEnabled -eq $true }). | Select-Object IPAddress, SubnetMask, DefaultIPGateway, DHCPEnabled
 
-# Step 2 - Gather Information about a Windows Server
-# Task 1 - Determine Operating System information
-$osInfo = Get-CimInstance -ComputerName $computername -ClassName Win32_OperatingSystem
-Write-Output "Operating System Information" | Out-File -FilePath "C:\YourLastNameFall2022.txt" -Append
-Write-Output "OS Name: $($osInfo.Caption)" | Out-File -FilePath "C:\YourLastNameFall2022.txt" -Append
-Write-Output "Build: $($osInfo.BuildNumber)" | Out-File -FilePath "C:\YourLastNameFall2022.txt" -Append
-Write-Output "Version: $($osInfo.Version)" | Out-File -FilePath "C:\YourLastNameFall2022.txt" -Append
+# 4. Acquire DNS Client Server address
+(Get-CimInstance -ClassName Win32_NetworkAdapterConfiguration | Where-Object { $_.DNSDomain -ne $null }). | Select-Object DNSServerSearchOrder
 
-# Task 2 - Processor information
-$processorInfo = Get-CimInstance -ComputerName $computername -ClassName Win32_Processor
-Write-Output "Processor Information" | Out-File -FilePath "C:\YourLastNameFall2022.txt" -Append
-Write-Output "Device ID: $($processorInfo.DeviceID)" | Out-File -FilePath "C:\YourLastNameFall2022.txt" -Append
-Write-Output "Name: $($processorInfo.Name)" | Out-File -FilePath "C:\YourLastNameFall2022.txt" -Append
-Write-Output "Max Clock Speed: $($processorInfo.MaxClockSpeed)" | Out-File -FilePath "C:\YourLastNameFall2022.txt" -Append
+# 5. Determine the amount of system memory in GB
+([math]::Round((Get-CimInstance -ClassName Win32_ComputerSystem).TotalPhysicalMemory / 1GB, 2))
 
-# Task 3 - Determine IP Address configuration
-$ipConfig = Get-CimInstance -ComputerName $computername -ClassName Win32_NetworkAdapterConfiguration | Where-Object { $_.IPAddress -ne $null }
-Write-Output "IP Address Configuration" | Out-File -FilePath "C:\YourLastNameFall2022.txt" -Append
-foreach ($config in $ipConfig) {
-    Write-Output "IP Address: $($config.IPAddress)" | Out-File -FilePath "C:\YourLastNameFall2022.txt" -Append
-    Write-Output "Subnet Mask: $($config.IPSubnet)" | Out-File -FilePath "C:\YourLastNameFall2022.txt" -Append
-    Write-Output "Default Gateway: $($config.DefaultIPGateway)" | Out-File -FilePath "C:\YourLastNameFall2022.txt" -Append
-    Write-Output "DHCP Enabled: $($config.DHCPEnabled)" | Out-File -FilePath "C:\YourLastNameFall2022.txt" -Append
-}
+# 6. Determine the amount of free space (in GB) for the c:\ drive
+(Get-CimInstance -ClassName Win32_LogicalDisk | Where-Object { $_.DeviceID -eq 'C:' }).FreeSpace / 1GB
 
-# Step 3 - Convert Your Commands to Run Remotely
+# 7. Determine last bootup date/time
+(Get-CimInstance -ClassName Win32_OperatingSystem).LastBootUpTime
 
+# 8. Determine last user login date & time
+(Get-WmiObject Win32_ComputerSystem).UserName
+(Get-WmiObject Win32_ComputerSystem).LastBootUpTime
 
-# Step 4 - Output the Results of Your Commands to a Report
+# 9. Retrieve all user accounts on the system
+(Get-WmiObject Win32_UserAccount).Name
 
-
-# Step 5 - Final review
+# 10. List all installed applications
+(Get-WmiObject -Query "SELECT * FROM Win32_Product"). | Select-Object Name, Vendor, Version
